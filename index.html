@@ -3,86 +3,163 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <meta name="theme-color" content="#07111f" />
-  <meta name="description" content="Mưa Gió - WebGIS thời tiết theo địa phương, dự báo và radar mưa gần thời gian thực trên nền Vietflex Map." />
-  <title>Mưa Gió LIVE · Vietflex Map</title>
+  <meta name="theme-color" content="#e8f7ff" />
+  <meta name="description" content="Mưa Gió GIS - radar, dự báo, trạm mưa thực địa VRain và ranh giới xã/phường Việt Nam trên Vietflex Map." />
+  <title>Mưa Gió GIS · Thời tiết theo xã/phường</title>
 
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
   <link rel="preconnect" href="https://api.open-meteo.com" crossorigin />
   <link rel="preconnect" href="https://api.rainviewer.com" crossorigin />
+  <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Vietflexmap/VN@6144d565fcf236727577ab3c4471bbe49f86892f/dist/vietflex.css" />
   <link rel="stylesheet" href="assets/app.css" />
 </head>
 <body>
   <div id="app" class="app-shell">
-    <div id="map" aria-label="Bản đồ thời tiết Việt Nam"></div>
+    <div id="map" aria-label="Bản đồ thời tiết và ranh giới hành chính Việt Nam"></div>
 
-    <header class="topbar glass" aria-label="Thanh công cụ">
-      <a class="brand" href="#" aria-label="Mưa Gió - trang chính">
-        <span class="brand-mark" aria-hidden="true">◉</span>
-        <span><strong>MƯA GIÓ · LIVE</strong><small>Vietflex Weather GIS</small></span>
+    <header class="topbar surface">
+      <a class="brand" href="#" aria-label="Mưa Gió GIS">
+        <span class="brand-mark">☔</span>
+        <span class="brand-copy"><strong>MƯA GIÓ GIS</strong><small>Thời tiết theo xã/phường · Vietflex</small></span>
+        <span class="live-badge"><i></i> LIVE</span>
       </a>
+
       <div class="search-wrap">
         <form id="searchForm" class="search-box" autocomplete="off">
-          <span class="search-icon" aria-hidden="true">⌕</span>
-          <input id="searchInput" type="search" placeholder="Tìm tỉnh, thành phố, huyện, địa danh…" aria-label="Tìm địa phương" />
-          <button id="clearSearch" class="icon-btn subtle" type="button" title="Xóa tìm kiếm" aria-label="Xóa tìm kiếm">×</button>
-          <button class="search-submit" type="submit">Tìm</button>
+          <span class="search-icon">⌕</span>
+          <input id="searchInput" type="search" placeholder="Tìm xã, phường, tỉnh, địa danh…" aria-label="Tìm địa phương" />
+          <button id="clearSearch" type="button" class="icon-btn quiet" aria-label="Xóa">×</button>
+          <button class="search-submit" type="submit">Tra cứu</button>
         </form>
-        <div id="searchResults" class="search-results glass" hidden></div>
+        <div id="searchResults" class="search-results surface" hidden></div>
       </div>
-      <div class="top-actions">
-        <button id="locateBtn" class="tool-btn" type="button" title="Vị trí của tôi">◎ <span>Vị trí</span></button>
-        <button id="layersBtn" class="tool-btn" type="button" title="Lớp bản đồ">▱ <span>Lớp</span></button>
-        <button id="weatherPanelBtn" class="tool-btn mobile-only" type="button" title="Bảng thời tiết">☁ <span>Thời tiết</span></button>
-      </div>
+
+      <nav class="top-actions" aria-label="Công cụ">
+        <button id="locateBtn" class="tool-btn" type="button">◎ <span>Vị trí</span></button>
+        <button id="layersBtn" class="tool-btn" type="button">▱ <span>Lớp</span></button>
+        <button id="weatherPanelBtn" class="tool-btn mobile-only" type="button">☀ <span>Thời tiết</span></button>
+      </nav>
     </header>
 
-    <aside id="layerPanel" class="layer-panel glass floating-panel" hidden aria-label="Lớp bản đồ">
-      <div class="panel-head"><div><small>BẢN ĐỒ NỀN</small><strong>Lớp hiển thị</strong></div><button class="icon-btn" data-close="layerPanel" type="button" aria-label="Đóng">×</button></div>
-      <div class="layer-list" role="radiogroup" aria-label="Bản đồ nền">
-        <button class="layer-option active" data-base="osm" type="button"><span class="swatch street"></span><span><b>Đường phố</b><small>OpenStreetMap</small></span><i>✓</i></button>
+    <section class="source-strip surface" aria-label="Trạng thái nguồn dữ liệu">
+      <span id="networkStatus" class="source-chip ready"><i></i>Mạng</span>
+      <span id="boundaryStatus" class="source-chip loading"><i></i>ẢnhMap</span>
+      <span id="vrainStatus" class="source-chip loading"><i></i>VRain</span>
+      <span id="modelStatus" class="source-chip loading"><i></i>Open‑Meteo</span>
+      <span id="radarSourceStatus" class="source-chip loading"><i></i>Radar</span>
+    </section>
+
+    <aside id="layerPanel" class="layer-panel surface floating-panel" hidden>
+      <div class="panel-head">
+        <div><small>LỚP BẢN ĐỒ</small><strong>Hiển thị dữ liệu</strong></div>
+        <button class="icon-btn" data-close="layerPanel" type="button">×</button>
+      </div>
+      <div class="layer-group-title">Bản đồ nền</div>
+      <div class="layer-list">
+        <button class="layer-option active" data-base="roadmap" type="button"><span class="swatch street"></span><span><b>Đường phố</b><small>Vietflex · Google compatibility</small></span><i>✓</i></button>
+        <button class="layer-option" data-base="osm" type="button"><span class="swatch osm"></span><span><b>OpenStreetMap</b><small>Nền mở</small></span><i>✓</i></button>
         <button class="layer-option" data-base="satellite" type="button"><span class="swatch satellite"></span><span><b>Vệ tinh</b><small>Esri World Imagery</small></span><i>✓</i></button>
         <button class="layer-option" data-base="terrain" type="button"><span class="swatch terrain"></span><span><b>Địa hình</b><small>OpenTopoMap</small></span><i>✓</i></button>
       </div>
       <div class="divider"></div>
-      <label class="switch-row"><span><b>Radar mưa LIVE</b><small>RainViewer · chuỗi ~10 phút/frame</small></span><input id="radarToggle" type="checkbox" checked /><span class="switch"></span></label>
-      <label class="switch-row"><span><b>Điểm thời tiết</b><small>Vị trí đang tra cứu</small></span><input id="markerToggle" type="checkbox" checked /><span class="switch"></span></label>
-      <div class="opacity-control"><div><b>Độ trong radar</b><output id="radarOpacityValue">65%</output></div><input id="radarOpacity" type="range" min="20" max="100" value="65" step="5" /></div>
+      <div class="layer-group-title">Dữ liệu chuyên đề</div>
+      <label class="switch-row"><span><b>Ranh giới xã/phường</b><small>PMTiles từ ẢnhMap</small></span><input id="boundaryToggle" type="checkbox" checked /><span class="switch"></span></label>
+      <label class="switch-row"><span><b>Trạm mưa VRain</b><small>Quan trắc thực địa public snapshot</small></span><input id="stationToggle" type="checkbox" checked /><span class="switch"></span></label>
+      <label class="switch-row"><span><b>Radar mưa</b><small>RainViewer · timeline 2 giờ</small></span><input id="radarToggle" type="checkbox" checked /><span class="switch"></span></label>
+      <label class="switch-row"><span><b>Điểm tra cứu</b><small>Tâm xã/phường hoặc vị trí chọn</small></span><input id="markerToggle" type="checkbox" checked /><span class="switch"></span></label>
+      <div class="opacity-control"><div><b>Độ trong radar</b><output id="radarOpacityValue">62%</output></div><input id="radarOpacity" type="range" min="20" max="100" value="62" step="5" /></div>
     </aside>
 
-    <main id="weatherPanel" class="weather-panel glass" aria-live="polite">
-      <div class="panel-drag mobile-only" aria-hidden="true"></div>
-      <section class="location-block"><div><p class="eyebrow">THỜI TIẾT GẦN THỜI GIAN THỰC</p><h1 id="placeName">Hà Nội</h1><p id="placeMeta" class="muted">21.0285°N · 105.8542°E</p></div><button id="refreshBtn" class="icon-btn refresh" type="button" title="Cập nhật dữ liệu" aria-label="Cập nhật dữ liệu">↻</button></section>
-      <section id="currentCard" class="current-card">
-        <div class="current-primary"><div id="weatherIcon" class="weather-icon" aria-hidden="true">☁</div><div><div class="temperature"><span id="currentTemp">--</span><sup>°C</sup></div><div id="weatherText" class="weather-text">Đang tải dữ liệu…</div></div></div>
+    <main id="weatherPanel" class="weather-panel surface" aria-live="polite">
+      <div class="panel-drag mobile-only"></div>
+      <section class="location-block">
+        <div>
+          <div class="eyebrow-row"><p class="eyebrow">THỜI TIẾT THEO ĐỊA PHƯƠNG</p><span id="adminBadge" class="admin-badge">Đang nhận diện…</span></div>
+          <h1 id="placeName">Hà Nội</h1>
+          <p id="placeMeta" class="muted">21.0285°N · 105.8542°E</p>
+        </div>
+        <button id="refreshBtn" class="icon-btn refresh" type="button" title="Cập nhật">↻</button>
+      </section>
+
+      <section id="rainAlert" class="rain-alert" hidden></section>
+
+      <section class="current-card sky-card">
+        <div class="current-primary">
+          <div id="weatherIcon" class="weather-icon">☀️</div>
+          <div><div class="temperature"><span id="currentTemp">--</span><sup>°C</sup></div><div id="weatherText" class="weather-text">Đang tải dữ liệu…</div></div>
+        </div>
         <div class="current-secondary"><span>Cảm giác <b id="feelsLike">--°</b></span><span>Cập nhật <b id="updatedAt">--:--</b></span></div>
       </section>
-      <section class="metrics-grid" aria-label="Chỉ số thời tiết">
+
+      <section class="fusion-flow" aria-label="Chuỗi dữ liệu thời tiết">
+        <article class="fusion-card radar"><span>01</span><small>RADAR</small><strong id="radarFusion">--</strong><em id="radarFusionSub">RainViewer</em></article>
+        <b class="flow-arrow">→</b>
+        <article class="fusion-card model"><span>02</span><small>MÔ HÌNH</small><strong id="modelRain">--</strong><em id="modelRainSub">Open‑Meteo</em></article>
+        <b class="flow-arrow">→</b>
+        <article class="fusion-card observed"><span>03</span><small>THỰC ĐO</small><strong id="observedRain">--</strong><em id="observedRainSub">VRain</em></article>
+        <b class="flow-arrow">→</b>
+        <article class="fusion-card admin"><span>04</span><small>XÃ/PHƯỜNG</small><strong id="boundaryFusion">--</strong><em id="boundaryFusionSub">ẢnhMap</em></article>
+      </section>
+
+      <section class="metrics-grid">
         <article><span class="metric-icon">💧</span><div><small>Độ ẩm</small><strong id="humidity">--%</strong></div></article>
-        <article><span class="metric-icon">☔</span><div><small>Lượng mưa</small><strong id="rain">-- mm</strong></div></article>
+        <article><span class="metric-icon">☔</span><div><small>Mưa mô hình</small><strong id="rain">-- mm</strong></div></article>
         <article><span class="metric-icon">➤</span><div><small>Gió</small><strong id="wind">-- km/h</strong><em id="windDir">--</em></div></article>
-        <article><span class="metric-icon">≋</span><div><small>Áp suất</small><strong id="pressure">-- hPa</strong></div></article>
+        <article><span class="metric-icon">◎</span><div><small>Áp suất</small><strong id="pressure">-- hPa</strong></div></article>
         <article><span class="metric-icon">☁</span><div><small>Mây</small><strong id="cloud">--%</strong></div></article>
         <article><span class="metric-icon">⚑</span><div><small>Gió giật</small><strong id="gust">-- km/h</strong></div></article>
       </section>
-      <section class="forecast-section"><div class="section-title"><div><small>24 GIỜ TỚI</small><strong>Dự báo theo giờ</strong></div><span class="source-pill">Open‑Meteo</span></div><div id="hourlyForecast" class="hourly-strip" tabindex="0"></div></section>
-      <section class="forecast-section daily-section"><div class="section-title"><div><small>7 NGÀY</small><strong>Xu hướng thời tiết</strong></div></div><div id="dailyForecast" class="daily-list"></div></section>
-      <section class="data-note"><span class="status-dot"></span><p><b>LIVE · đang kết nối.</b> Ứng dụng tự đồng bộ thời tiết và radar; không dùng thay cảnh báo chính thức khi có thiên tai.</p></section>
+
+      <section class="admin-card">
+        <div class="section-title"><div><small>ĐƠN VỊ ĐANG CHỌN</small><strong id="communeName">Chưa chọn xã/phường</strong></div><span class="source-pill">ẢnhMap</span></div>
+        <p id="communeMeta">Click trực tiếp vào một xã/phường trên bản đồ để đồng bộ toàn bộ dữ liệu.</p>
+      </section>
+
+      <section class="forecast-section stations-section">
+        <div class="section-title"><div><small>QUAN TRẮC THỰC ĐỊA</small><strong>Trạm mưa VRain gần nhất</strong></div><span id="stationSummary" class="source-pill">Đang tải…</span></div>
+        <div id="nearestStations" class="station-list"><div class="empty-state">Đang đồng bộ mạng lưới trạm…</div></div>
+      </section>
+
+      <section class="forecast-section">
+        <div class="section-title"><div><small>1–24 GIỜ TỚI</small><strong>Dự báo mưa & thời tiết theo giờ</strong></div><span class="source-pill">Open‑Meteo</span></div>
+        <div id="hourlyForecast" class="hourly-strip" tabindex="0"></div>
+      </section>
+
+      <section class="forecast-section daily-section">
+        <div class="section-title"><div><small>7 NGÀY</small><strong>Xu hướng thời tiết</strong></div></div>
+        <div id="dailyForecast" class="daily-list"></div>
+      </section>
+
+      <section class="data-note"><span class="status-dot"></span><p><b>Hệ thống tổng hợp nhiều nguồn.</b> VRain là dữ liệu quan trắc public snapshot; Open‑Meteo là mô hình dự báo theo tọa độ; RainViewer là radar tổng hợp. Khi có thiên tai, ưu tiên cảnh báo chính thức của cơ quan chức năng.</p></section>
     </main>
 
-    <section class="quick-places glass" aria-label="Địa phương nhanh">
-      <button data-place="Hà Nội" data-lat="21.0285" data-lon="105.8542">Hà Nội</button><button data-place="TP. Hồ Chí Minh" data-lat="10.7769" data-lon="106.7009">TP.HCM</button><button data-place="Đà Nẵng" data-lat="16.0544" data-lon="108.2022">Đà Nẵng</button><button data-place="Huế" data-lat="16.4637" data-lon="107.5909">Huế</button><button data-place="Cần Thơ" data-lat="10.0452" data-lon="105.7469">Cần Thơ</button>
+    <section class="quick-places surface" aria-label="Địa phương nhanh">
+      <button data-place="Hà Nội" data-lat="21.0285" data-lon="105.8542">Hà Nội</button>
+      <button data-place="TP. Hồ Chí Minh" data-lat="10.7769" data-lon="106.7009">TP.HCM</button>
+      <button data-place="Đà Nẵng" data-lat="16.0544" data-lon="108.2022">Đà Nẵng</button>
+      <button data-place="Huế" data-lat="16.4637" data-lon="107.5909">Huế</button>
+      <button data-place="Cần Thơ" data-lat="10.0452" data-lon="105.7469">Cần Thơ</button>
     </section>
 
-    <section id="radarBar" class="radar-bar glass" aria-label="Dòng thời gian radar mưa">
+    <aside class="rain-legend surface" aria-label="Chú giải trạm mưa">
+      <strong>TRẠM MƯA</strong><span><i class="r0"></i>0</span><span><i class="r1"></i>&lt;5</span><span><i class="r2"></i>5–15</span><span><i class="r3"></i>15–30</span><span><i class="r4"></i>&gt;30 mm</span>
+    </aside>
+
+    <section id="radarBar" class="radar-bar surface">
       <button id="radarPlayBtn" class="radar-play" type="button" aria-label="Phát radar">▶</button>
-      <div class="radar-timeline"><div class="radar-meta"><span><b>RADAR MƯA · LIVE</b> <i id="radarStatus">Đang kết nối…</i></span><time id="radarTime">--:--</time></div><input id="radarSlider" type="range" min="0" max="0" value="0" step="1" aria-label="Khung thời gian radar" /><div class="timeline-labels"><span>-2 giờ</span><span>-1 giờ</span><span>Hiện tại</span></div></div>
-      <span class="radar-credit">Radar: RainViewer</span>
+      <div class="radar-timeline">
+        <div class="radar-meta"><span><b>RADAR MƯA</b> <i id="radarStatus">Đang kết nối…</i></span><time id="radarTime">--:--</time></div>
+        <input id="radarSlider" type="range" min="0" max="0" value="0" step="1" aria-label="Khung thời gian radar" />
+        <div class="timeline-labels"><span>-2 giờ</span><span>-1 giờ</span><span>Gần nhất</span></div>
+      </div>
+      <a class="radar-credit" href="https://www.rainviewer.com/" target="_blank" rel="noopener">Radar: RainViewer</a>
     </section>
-    <div id="toast" class="toast glass" role="status" hidden></div>
-    <div id="loading" class="loading-overlay" hidden><div class="spinner"></div><span>Đang đồng bộ dữ liệu…</span></div>
+
+    <div id="toast" class="toast surface" role="status" hidden></div>
+    <div id="loading" class="loading-overlay surface" hidden><div class="spinner"></div><span id="loadingText">Đang cập nhật…</span></div>
   </div>
+
   <noscript>Trang này cần JavaScript để hiển thị bản đồ và dữ liệu thời tiết.</noscript>
   <script src="https://cdn.jsdelivr.net/gh/Vietflexmap/VN@6144d565fcf236727577ab3c4471bbe49f86892f/dist/vietflex.js"></script>
   <script src="assets/app.js"></script>
