@@ -5,11 +5,12 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#07111f" />
   <meta name="description" content="Mưa Gió - WebGIS thời tiết theo địa phương, dự báo và radar mưa gần thời gian thực trên nền Vietflex Map." />
-  <title>Mưa Gió · Vietflex Map</title>
+  <title>Mưa Gió LIVE · Vietflex Map</title>
 
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
   <link rel="preconnect" href="https://api.open-meteo.com" crossorigin />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Vietflexmap/VN@v2.7.0-vf.55.1/dist/vietflex.css" />
+  <link rel="preconnect" href="https://api.rainviewer.com" crossorigin />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Vietflexmap/VN@6144d565fcf236727577ab3c4471bbe49f86892f/dist/vietflex.css" />
   <link rel="stylesheet" href="assets/app.css" />
 </head>
 <body>
@@ -19,7 +20,7 @@
     <header class="topbar glass" aria-label="Thanh công cụ">
       <a class="brand" href="#" aria-label="Mưa Gió - trang chính">
         <span class="brand-mark" aria-hidden="true">◉</span>
-        <span><strong>MƯA GIÓ</strong><small>Vietflex Weather GIS</small></span>
+        <span><strong>MƯA GIÓ · LIVE</strong><small>Vietflex Weather GIS</small></span>
       </a>
       <div class="search-wrap">
         <form id="searchForm" class="search-box" autocomplete="off">
@@ -45,14 +46,14 @@
         <button class="layer-option" data-base="terrain" type="button"><span class="swatch terrain"></span><span><b>Địa hình</b><small>OpenTopoMap</small></span><i>✓</i></button>
       </div>
       <div class="divider"></div>
-      <label class="switch-row"><span><b>Radar mưa</b><small>RainViewer · ~10 phút/frame</small></span><input id="radarToggle" type="checkbox" checked /><span class="switch"></span></label>
+      <label class="switch-row"><span><b>Radar mưa LIVE</b><small>RainViewer · chuỗi ~10 phút/frame</small></span><input id="radarToggle" type="checkbox" checked /><span class="switch"></span></label>
       <label class="switch-row"><span><b>Điểm thời tiết</b><small>Vị trí đang tra cứu</small></span><input id="markerToggle" type="checkbox" checked /><span class="switch"></span></label>
       <div class="opacity-control"><div><b>Độ trong radar</b><output id="radarOpacityValue">65%</output></div><input id="radarOpacity" type="range" min="20" max="100" value="65" step="5" /></div>
     </aside>
 
     <main id="weatherPanel" class="weather-panel glass" aria-live="polite">
       <div class="panel-drag mobile-only" aria-hidden="true"></div>
-      <section class="location-block"><div><p class="eyebrow">THỜI TIẾT TẠI ĐỊA PHƯƠNG</p><h1 id="placeName">Hà Nội</h1><p id="placeMeta" class="muted">21.0285°N · 105.8542°E</p></div><button id="refreshBtn" class="icon-btn refresh" type="button" title="Cập nhật dữ liệu" aria-label="Cập nhật dữ liệu">↻</button></section>
+      <section class="location-block"><div><p class="eyebrow">THỜI TIẾT GẦN THỜI GIAN THỰC</p><h1 id="placeName">Hà Nội</h1><p id="placeMeta" class="muted">21.0285°N · 105.8542°E</p></div><button id="refreshBtn" class="icon-btn refresh" type="button" title="Cập nhật dữ liệu" aria-label="Cập nhật dữ liệu">↻</button></section>
       <section id="currentCard" class="current-card">
         <div class="current-primary"><div id="weatherIcon" class="weather-icon" aria-hidden="true">☁</div><div><div class="temperature"><span id="currentTemp">--</span><sup>°C</sup></div><div id="weatherText" class="weather-text">Đang tải dữ liệu…</div></div></div>
         <div class="current-secondary"><span>Cảm giác <b id="feelsLike">--°</b></span><span>Cập nhật <b id="updatedAt">--:--</b></span></div>
@@ -67,7 +68,7 @@
       </section>
       <section class="forecast-section"><div class="section-title"><div><small>24 GIỜ TỚI</small><strong>Dự báo theo giờ</strong></div><span class="source-pill">Open‑Meteo</span></div><div id="hourlyForecast" class="hourly-strip" tabindex="0"></div></section>
       <section class="forecast-section daily-section"><div class="section-title"><div><small>7 NGÀY</small><strong>Xu hướng thời tiết</strong></div></div><div id="dailyForecast" class="daily-list"></div></section>
-      <section class="data-note"><span class="status-dot"></span><p><b>Dữ liệu gần thời gian thực.</b> Điều kiện hiện tại và dự báo là dữ liệu mô hình theo tọa độ; radar là ảnh tổng hợp mưa. Không dùng thay cảnh báo chính thức khi có thiên tai.</p></section>
+      <section class="data-note"><span class="status-dot"></span><p><b>LIVE · đang kết nối.</b> Ứng dụng tự đồng bộ thời tiết và radar; không dùng thay cảnh báo chính thức khi có thiên tai.</p></section>
     </main>
 
     <section class="quick-places glass" aria-label="Địa phương nhanh">
@@ -76,14 +77,14 @@
 
     <section id="radarBar" class="radar-bar glass" aria-label="Dòng thời gian radar mưa">
       <button id="radarPlayBtn" class="radar-play" type="button" aria-label="Phát radar">▶</button>
-      <div class="radar-timeline"><div class="radar-meta"><span><b>RADAR MƯA</b> <i id="radarStatus">Đang kết nối…</i></span><time id="radarTime">--:--</time></div><input id="radarSlider" type="range" min="0" max="0" value="0" step="1" aria-label="Khung thời gian radar" /><div class="timeline-labels"><span>-2 giờ</span><span>-1 giờ</span><span>Hiện tại</span></div></div>
+      <div class="radar-timeline"><div class="radar-meta"><span><b>RADAR MƯA · LIVE</b> <i id="radarStatus">Đang kết nối…</i></span><time id="radarTime">--:--</time></div><input id="radarSlider" type="range" min="0" max="0" value="0" step="1" aria-label="Khung thời gian radar" /><div class="timeline-labels"><span>-2 giờ</span><span>-1 giờ</span><span>Hiện tại</span></div></div>
       <span class="radar-credit">Radar: RainViewer</span>
     </section>
     <div id="toast" class="toast glass" role="status" hidden></div>
-    <div id="loading" class="loading-overlay" hidden><div class="spinner"></div><span>Đang cập nhật thời tiết…</span></div>
+    <div id="loading" class="loading-overlay" hidden><div class="spinner"></div><span>Đang đồng bộ dữ liệu…</span></div>
   </div>
   <noscript>Trang này cần JavaScript để hiển thị bản đồ và dữ liệu thời tiết.</noscript>
-  <script src="https://cdn.jsdelivr.net/gh/Vietflexmap/VN@v2.7.0-vf.55.1/dist/vietflex.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/Vietflexmap/VN@6144d565fcf236727577ab3c4471bbe49f86892f/dist/vietflex.js"></script>
   <script src="assets/app.js"></script>
 </body>
 </html>
