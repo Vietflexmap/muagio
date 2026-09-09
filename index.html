@@ -36,11 +36,22 @@
         ? V.tileLayer.bind(V)
         : null;
 
-      const googleLayer = (mapType, options = {}) => V.legacyGoogleTiles({
-        mapType,
-        maxZoom: 21,
-        ...options
-      });
+      const googleLayer = (mapType, options = {}) => {
+        // Do not forward attribution/subdomain values from the old OSM/Esri/OpenTopo
+        // layer definitions. Vietflex/Google must own attribution for Google tiles.
+        const {
+          attribution: _oldAttribution,
+          subdomains: _oldSubdomains,
+          maxNativeZoom: _oldMaxNativeZoom,
+          ...safeOptions
+        } = options || {};
+
+        return V.legacyGoogleTiles({
+          mapType,
+          maxZoom: 21,
+          ...safeOptions
+        });
+      };
 
       V.tileLayer = function(url, options = {}) {
         if (typeof url === 'string') {
@@ -61,7 +72,7 @@
     })();
   </script>
 
-  <link rel="stylesheet" href="assets/app.css?v=20260909-2" />
+  <link rel="stylesheet" href="assets/app.css?v=20260909-3" />
 </head>
 <body>
   <div id="app" class="app-shell">
@@ -209,6 +220,6 @@
   </div>
 
   <noscript>Trang này cần JavaScript để hiển thị bản đồ và dữ liệu thời tiết.</noscript>
-  <script src="assets/app.js?v=20260909-2"></script>
+  <script src="assets/app.js?v=20260909-3"></script>
 </body>
 </html>
