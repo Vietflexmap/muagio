@@ -18,7 +18,50 @@
     href="https://cdn.jsdelivr.net/gh/Vietflexmap/VN@6144d565fcf236727577ab3c4471bbe49f86892f/dist/vietflex.css">
   <script src="https://cdn.jsdelivr.net/gh/Vietflexmap/VN@6144d565fcf236727577ab3c4471bbe49f86892f/dist/vietflex.js"></script>
 
-  <link rel="stylesheet" href="assets/app.css?v=20260909-1" />
+  <!--
+    MuaGio Google basemap adapter.
+    assets/app.js originally creates OSM / Esri / OpenTopo layers. This adapter keeps
+    all existing weather/radar logic intact while routing those three internal layer
+    slots through Vietflex legacy Google tiles:
+      osm       -> Google Roadmap
+      satellite -> Google Satellite (Google Earth style)
+      terrain   -> Google Hybrid
+  -->
+  <script>
+    (() => {
+      const V = window.Vietflex;
+      if (!V || typeof V.legacyGoogleTiles !== 'function') return;
+
+      const originalTileLayer = typeof V.tileLayer === 'function'
+        ? V.tileLayer.bind(V)
+        : null;
+
+      const googleLayer = (mapType, options = {}) => V.legacyGoogleTiles({
+        mapType,
+        maxZoom: 21,
+        ...options
+      });
+
+      V.tileLayer = function(url, options = {}) {
+        if (typeof url === 'string') {
+          if (url.includes('tile.openstreetmap.org')) {
+            return googleLayer('roadmap', options);
+          }
+          if (url.includes('server.arcgisonline.com')) {
+            return googleLayer('satellite', options);
+          }
+          if (url.includes('tile.opentopomap.org')) {
+            return googleLayer('hybrid', options);
+          }
+        }
+        return originalTileLayer
+          ? originalTileLayer(url, options)
+          : new V.TileLayer(url, options);
+      };
+    })();
+  </script>
+
+  <link rel="stylesheet" href="assets/app.css?v=20260909-2" />
 </head>
 <body>
   <div id="app" class="app-shell">
@@ -61,12 +104,11 @@
         <div><small>LỚP BẢN ĐỒ</small><strong>Hiển thị dữ liệu</strong></div>
         <button class="icon-btn" data-close="layerPanel" type="button">×</button>
       </div>
-      <div class="layer-group-title">Bản đồ nền</div>
+      <div class="layer-group-title">Bản đồ nền Google</div>
       <div class="layer-list">
-        <button class="layer-option active" data-base="roadmap" type="button"><span class="swatch street"></span><span><b>Đường phố</b><small>Vietflex · Google compatibility</small></span><i>✓</i></button>
-        <button class="layer-option" data-base="osm" type="button"><span class="swatch osm"></span><span><b>OpenStreetMap</b><small>Nền mở</small></span><i>✓</i></button>
-        <button class="layer-option" data-base="satellite" type="button"><span class="swatch satellite"></span><span><b>Vệ tinh</b><small>Esri World Imagery</small></span><i>✓</i></button>
-        <button class="layer-option" data-base="terrain" type="button"><span class="swatch terrain"></span><span><b>Địa hình</b><small>OpenTopoMap</small></span><i>✓</i></button>
+        <button class="layer-option active" data-base="osm" type="button"><span class="swatch street"></span><span><b>Google Maps</b><small>Roadmap · tiếng Việt · khu vực VN</small></span><i>✓</i></button>
+        <button class="layer-option" data-base="satellite" type="button"><span class="swatch satellite"></span><span><b>Google Earth</b><small>Satellite imagery</small></span><i>✓</i></button>
+        <button class="layer-option" data-base="terrain" type="button"><span class="swatch terrain"></span><span><b>Google Hybrid</b><small>Vệ tinh + đường và nhãn</small></span><i>✓</i></button>
       </div>
       <div class="divider"></div>
       <div class="layer-group-title">Dữ liệu chuyên đề</div>
@@ -167,6 +209,6 @@
   </div>
 
   <noscript>Trang này cần JavaScript để hiển thị bản đồ và dữ liệu thời tiết.</noscript>
-  <script src="assets/app.js?v=20260909-1"></script>
+  <script src="assets/app.js?v=20260909-2"></script>
 </body>
 </html>
