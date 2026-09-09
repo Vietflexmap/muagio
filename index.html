@@ -5,14 +5,20 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#e8f7ff" />
   <meta name="description" content="Mưa Gió GIS - radar, dự báo, trạm mưa thực địa VRain và ranh giới xã/phường Việt Nam trên Vietflex Map." />
+  <meta name="vietflex-core" content="Vietflex 1.0.0 @ 6144d565fcf236727577ab3c4471bbe49f86892f" />
   <title>Mưa Gió GIS · Thời tiết theo xã/phường</title>
 
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
   <link rel="preconnect" href="https://api.open-meteo.com" crossorigin />
   <link rel="preconnect" href="https://api.rainviewer.com" crossorigin />
   <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Vietflexmap/VN@6144d565fcf236727577ab3c4471bbe49f86892f/dist/vietflex.css" />
-  <link rel="stylesheet" href="assets/app.css" />
+
+  <!-- Vietflex Map Core: pinned build for stable GitHub Pages deployment -->
+  <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/gh/Vietflexmap/VN@6144d565fcf236727577ab3c4471bbe49f86892f/dist/vietflex.css">
+  <script src="https://cdn.jsdelivr.net/gh/Vietflexmap/VN@6144d565fcf236727577ab3c4471bbe49f86892f/dist/vietflex.js"></script>
+
+  <link rel="stylesheet" href="assets/app.css?v=20260909-1" />
 </head>
 <body>
   <div id="app" class="app-shell">
@@ -161,7 +167,6 @@
   </div>
 
   <noscript>Trang này cần JavaScript để hiển thị bản đồ và dữ liệu thời tiết.</noscript>
-  <script src="https://cdn.jsdelivr.net/gh/Vietflexmap/VN@6144d565fcf236727577ab3c4471bbe49f86892f/dist/vietflex.js"></script>
-  <script src="assets/app.js"></script>
+  <script src="assets/app.js?v=20260909-1"></script>
 </body>
 </html>
