@@ -36,6 +36,7 @@
   </script>
 
   <link rel="stylesheet" href="assets/rainfirst.css?v=20260911-rainfirst1" />
+  <link rel="stylesheet" href="assets/ui-ux-20260911.css?v=2" />
 </head>
 <body>
   <div id="app" class="app-shell">
@@ -93,13 +94,19 @@
     <main id="weatherPanel" class="weather-panel surface" aria-live="polite">
       <div class="panel-drag mobile-only"></div>
 
-      <section class="lookup-card">
-        <div class="section-title compact"><div><small>TRA CỨU ĐỊA PHƯƠNG</small><strong>34 tỉnh/thành · 3.321 xã/phường/đặc khu</strong></div><span class="source-pill">sapnhap</span></div>
-        <div class="admin-selects">
-          <label><span>Tỉnh / thành</span><select id="provinceSelect"><option value="">Chọn tỉnh/thành</option></select></label>
-          <label><span>Xã / phường / đặc khu</span><select id="unitSelect" disabled><option value="">Chọn đơn vị</option></select></label>
+      <details class="lookup-card lookup-collapsible">
+        <summary class="lookup-summary" aria-label="Mở hoặc đóng bảng tra cứu địa phương">
+          <span class="lookup-summary-copy"><small>TRA CỨU ĐỊA PHƯƠNG</small><strong>34 tỉnh/thành · 3.321 xã/phường/đặc khu</strong></span>
+          <span class="lookup-summary-actions"><span class="source-pill">sapnhap</span><span class="lookup-chevron" aria-hidden="true">⌄</span></span>
+        </summary>
+        <div class="lookup-body">
+          <div class="admin-selects">
+            <label><span>Tỉnh / thành</span><select id="provinceSelect"><option value="">Chọn tỉnh/thành</option></select></label>
+            <label><span>Xã / phường / đặc khu</span><select id="unitSelect" disabled><option value="">Chọn đơn vị</option></select></label>
+          </div>
+          <p class="lookup-hint">Mở khi cần chọn nhanh đơn vị hành chính; đóng lại để ưu tiên không gian xem mưa và bản đồ.</p>
         </div>
-      </section>
+      </details>
 
       <section class="location-block">
         <div>
